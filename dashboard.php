@@ -1,10 +1,54 @@
 <?php
 session_start();
 require_once 'db.php';
+
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
 }
+
+$user_id = (int) $_SESSION['user_id'];
+
+// Данные текущего пользователя
+$stmt_user = mysqli_prepare($conn, "SELECT id, name, email FROM users WHERE id = ?");
+mysqli_stmt_bind_param($stmt_user, 'i', $user_id);
+mysqli_stmt_execute($stmt_user);
+$result_user = mysqli_stmt_get_result($stmt_user);
+$user = mysqli_fetch_assoc($result_user);
+mysqli_stmt_close($stmt_user);
+
+if (!$user) {
+    session_destroy();
+    header('Location: login.php');
+    exit;
+}
+
+// Количество заявок
+$stmt_req = mysqli_prepare($conn, "SELECT COUNT(*) AS total_requests FROM requests WHERE user_id = ?");
+mysqli_stmt_bind_param($stmt_req, 'i', $user_id);
+mysqli_stmt_execute($stmt_req);
+$result_req = mysqli_stmt_get_result($stmt_req);
+$row_req = mysqli_fetch_assoc($result_req);
+$total_requests = (int) $row_req['total_requests'];
+mysqli_stmt_close($stmt_req);
+
+// Количество счетов
+$stmt_bills = mysqli_prepare($conn, "SELECT COUNT(*) AS total_bills FROM bills WHERE user_id = ?");
+mysqli_stmt_bind_param($stmt_bills, 'i', $user_id);
+mysqli_stmt_execute($stmt_bills);
+$result_bills = mysqli_stmt_get_result($stmt_bills);
+$row_bills = mysqli_fetch_assoc($result_bills);
+$total_bills = (int) $row_bills['total_bills'];
+mysqli_stmt_close($stmt_bills);
+
+// Количество неоплаченных счетов
+$stmt_unpaid = mysqli_prepare($conn, "SELECT COUNT(*) AS unpaid_bills FROM bills WHERE user_id = ? AND status = 'Ожидает оплаты'");
+mysqli_stmt_bind_param($stmt_unpaid, 'i', $user_id);
+mysqli_stmt_execute($stmt_unpaid);
+$result_unpaid = mysqli_stmt_get_result($stmt_unpaid);
+$row_unpaid = mysqli_fetch_assoc($result_unpaid);
+$unpaid_bills = (int) $row_unpaid['unpaid_bills'];
+mysqli_stmt_close($stmt_unpaid);
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -36,36 +80,44 @@ if (!isset($_SESSION['user_id'])) {
 
     <div class="container">
         <h1>Личный кабинет</h1>
-        <?php if (isset($_SESSION['user_name'])): ?>
-            <p class="lead">Здравствуйте, <?= htmlspecialchars($_SESSION['user_name']) ?>!</p>
-        <?php endif; ?>
-        <div class="row">
-            <div class="col-md-4">
-                <div class="card">
+        <p class="lead">Здравствуйте, <?= htmlspecialchars($user['name']) ?>!</p>
+        <p class="text-muted"><?= htmlspecialchars($user['email']) ?></p>
+
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
                     <div class="card-body text-center">
                         <h5 class="card-title">Мои заявки</h5>
-                        <p class="card-text">Просмотр и отслеживание поданных заявок.</p>
+                        <p class="card-text display-6 text-primary"><?= $total_requests ?></p>
                         <a href="requests.php" class="btn btn-primary">Перейти</a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card">
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
                     <div class="card-body text-center">
                         <h5 class="card-title">Мои счета</h5>
-                        <p class="card-text">Просмотр счетов ЖКХ и оплата.</p>
+                        <p class="card-text display-6 text-primary"><?= $total_bills ?></p>
                         <a href="bills.php" class="btn btn-primary">Перейти</a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card">
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
                     <div class="card-body text-center">
-                        <h5 class="card-title">Подать заявку</h5>
-                        <p class="card-text">Создать новую заявку в управляющую компанию.</p>
-                        <a href="requests.php" class="btn btn-primary">Перейти</a>
+                        <h5 class="card-title">Неоплаченные счета</h5>
+                        <p class="card-text display-6 text-primary"><?= $unpaid_bills ?></p>
+                        <a href="bills.php" class="btn btn-primary">Оплатить</a>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Быстрые действия</div>
+            <div class="card-body">
+                <a href="requests.php" class="btn btn-outline-primary me-2">Подать заявку</a>
+                <a href="bills.php" class="btn btn-outline-primary">Просмотреть счета</a>
             </div>
         </div>
     </div>
