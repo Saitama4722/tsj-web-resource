@@ -1,6 +1,9 @@
 <?php
 session_start();
 require_once 'db.php';
+
+$is_logged_in = isset($_SESSION['user_id']);
+$user_name = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : '';
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -21,7 +24,7 @@ require_once 'db.php';
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link active" href="index.php">Главная</a></li>
-                    <?php if (isset($_SESSION['user_id'])): ?>
+                    <?php if ($is_logged_in): ?>
                         <li class="nav-item"><a class="nav-link" href="dashboard.php">Личный кабинет</a></li>
                         <li class="nav-item"><a class="nav-link" href="requests.php">Заявки</a></li>
                         <li class="nav-item"><a class="nav-link" href="bills.php">Счета</a></li>
@@ -36,17 +39,67 @@ require_once 'db.php';
     </nav>
 
     <div class="container">
-        <h1>ТСЖ Онлайн</h1>
-        <section>
-            <p class="lead text-center">
-                Сервис для управления домом: оплата счетов ЖКХ и подача заявок в управляющую компанию.
-            </p>
-            <p class="text-center">
-                Войдите в личный кабинет или зарегистрируйтесь, чтобы просматривать счета и создавать заявки.
-            </p>
-            <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center mt-4">
-                <a href="login.php" class="btn btn-primary">Вход</a>
-                <a href="register.php" class="btn btn-outline-primary">Регистрация</a>
+        <section class="py-5">
+            <div class="text-center py-4 px-3 rounded-3 bg-light border">
+                <?php if ($is_logged_in): ?>
+                    <h1 class="display-5 fw-bold mb-3">Добро пожаловать, <?= htmlspecialchars($user_name) ?>!</h1>
+                    <p class="lead text-muted mb-4">Вы можете перейти в личный кабинет, просмотреть счета и отправить заявку</p>
+                    <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                        <a href="dashboard.php" class="btn btn-primary">Личный кабинет</a>
+                        <a href="requests.php" class="btn btn-outline-primary">Мои заявки</a>
+                    </div>
+                <?php else: ?>
+                    <h1 class="display-5 fw-bold mb-3">ТСЖ Онлайн</h1>
+                    <p class="lead text-muted mb-2">Удобный веб-ресурс для оплаты счетов и подачи заявок в ТСЖ/ЖКХ</p>
+                    <p class="mb-4">Здесь вы можете просматривать начисления за коммунальные услуги, оплачивать счета и отправлять заявки в управляющую организацию без визита в офис.</p>
+                    <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                        <a href="login.php" class="btn btn-primary">Войти</a>
+                        <a href="register.php" class="btn btn-outline-primary">Зарегистрироваться</a>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </section>
+
+        <section class="mb-5">
+            <div class="row g-4">
+                <div class="col-12 col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Оплата счетов</h5>
+                            <p class="card-text">Просмотр начислений и контроль оплаты коммунальных услуг</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Подача заявок</h5>
+                            <p class="card-text">Отправка обращений в управляющую организацию в удобной форме</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Личный кабинет</h5>
+                            <p class="card-text">Быстрый доступ к заявкам, счетам и персональной информации</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-5">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title h4 mb-4">Преимущества системы</h2>
+                    <ul class="mb-0">
+                        <li>доступ с компьютера и телефона</li>
+                        <li>простой и понятный интерфейс</li>
+                        <li>быстрый доступ к основным функциям</li>
+                        <li>централизованное взаимодействие с ТСЖ/ЖКХ</li>
+                    </ul>
+                </div>
             </div>
         </section>
     </div>
