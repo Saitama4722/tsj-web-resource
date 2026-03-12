@@ -1,6 +1,19 @@
 <?php
 session_start();
 require_once 'db.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+$user_id = (int) $_SESSION['user_id'];
+$stmt = mysqli_prepare($conn, "SELECT id, month, amount, status FROM bills WHERE user_id = ? ORDER BY id DESC");
+mysqli_stmt_bind_param($stmt, 'i', $user_id);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$bills = mysqli_fetch_all($result, MYSQLI_ASSOC);
+mysqli_stmt_close($stmt);
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -21,15 +34,10 @@ require_once 'db.php';
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="index.php">Главная</a></li>
-                    <?php if (isset($_SESSION['user_id'])): ?>
-                        <li class="nav-item"><a class="nav-link" href="dashboard.php">Личный кабинет</a></li>
-                        <li class="nav-item"><a class="nav-link" href="requests.php">Заявки</a></li>
-                        <li class="nav-item"><a class="nav-link active" href="bills.php">Счета</a></li>
-                        <li class="nav-item"><a class="nav-link" href="logout.php">Выйти</a></li>
-                    <?php else: ?>
-                        <li class="nav-item"><a class="nav-link" href="login.php">Вход</a></li>
-                        <li class="nav-item"><a class="nav-link" href="register.php">Регистрация</a></li>
-                    <?php endif; ?>
+                    <li class="nav-item"><a class="nav-link" href="dashboard.php">Личный кабинет</a></li>
+                    <li class="nav-item"><a class="nav-link" href="requests.php">Заявки</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="bills.php">Счета</a></li>
+                    <li class="nav-item"><a class="nav-link" href="logout.php">Выйти</a></li>
                 </ul>
             </div>
         </div>
@@ -37,44 +45,43 @@ require_once 'db.php';
 
     <div class="container">
         <h1>Счета ЖКХ</h1>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead class="table-primary">
-                    <tr>
-                        <th>№</th>
-                        <th>Месяц</th>
-                        <th>Сумма</th>
-                        <th>Статус</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Январь 2025</td>
-                        <td>3 500 ₽</td>
-                        <td><span class="badge bg-success">Оплачен</span></td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Февраль 2025</td>
-                        <td>3 720 ₽</td>
-                        <td><span class="badge bg-success">Оплачен</span></td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>Март 2025</td>
-                        <td>3 650 ₽</td>
-                        <td><span class="badge bg-warning text-dark">Ожидает оплаты</span></td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>Апрель 2025</td>
-                        <td>—</td>
-                        <td><span class="badge bg-secondary">Не выставлен</span></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+
+        <?php if (count($bills) > 0): ?>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>№</th>
+                            <th>Месяц</th>
+                            <th>Сумма</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($bills as $index => $row): ?>
+                            <?php
+                            $amountFormatted = number_format((float) $row['amount'], 2, '.', '') . ' ₽';
+                            if ($row['status'] === 'Оплачен') {
+                                $badgeClass = 'badge bg-success';
+                            } elseif ($row['status'] === 'Ожидает оплаты') {
+                                $badgeClass = 'badge bg-warning text-dark';
+                            } else {
+                                $badgeClass = 'badge bg-secondary';
+                            }
+                            ?>
+                            <tr>
+                                <td><?= $index + 1 ?></td>
+                                <td><?= htmlspecialchars($row['month']) ?></td>
+                                <td><?= htmlspecialchars($amountFormatted) ?></td>
+                                <td><span class="<?= $badgeClass ?>"><?= htmlspecialchars($row['status']) ?></span></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <p class="text-muted">У вас пока нет выставленных счетов</p>
+        <?php endif; ?>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
