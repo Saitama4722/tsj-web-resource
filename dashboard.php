@@ -117,7 +117,10 @@ mysqli_stmt_close($stmt_unpaid);
             <div class="card-header">Быстрые действия</div>
             <div class="card-body">
                 <a href="requests.php" class="btn btn-outline-primary me-2">Подать заявку</a>
-                <a href="bills.php" class="btn btn-outline-primary">Просмотреть счета</a>
+                <a href="bills.php" class="btn btn-outline-primary me-2">Просмотреть счета</a>
+                <?php if (!empty($_SESSION['is_admin'])): ?>
+                    <a href="admin.php" class="btn btn-outline-secondary">Панель администратора</a>
+                <?php endif; ?>
             </div>
         </div>
     </div>

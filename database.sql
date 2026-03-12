@@ -37,11 +37,13 @@ CREATE TABLE IF NOT EXISTS bills (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Тестовые данные: 2 пользователя
--- Пароль для обоих: 123456 (хеш bcrypt)
+-- Тестовые данные: 2 пользователя + администратор
+-- Обычные пользователи: пароль 123456 (хеш bcrypt)
+-- Администратор: admin@tsj.local, пароль admin123 (хеш bcrypt)
 INSERT INTO users (name, email, password) VALUES
 ('Иван Петров', 'ivan@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),
-('Мария Сидорова', 'maria@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+('Мария Сидорова', 'maria@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),
+('Администратор', 'admin@tsj.local', '$2y$12$f3DHtupoVMAfkOXTxR/l1umQNGXShIAck4C6dkfR4r97GfYKzcp2m');
 
 -- Тестовые данные: 3 заявки
 INSERT INTO requests (user_id, title, description, status) VALUES

@@ -44,9 +44,12 @@ $user_name = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : '';
                 <?php if ($is_logged_in): ?>
                     <h1 class="display-5 fw-bold mb-3">Добро пожаловать, <?= htmlspecialchars($user_name) ?>!</h1>
                     <p class="lead text-muted mb-4">Вы можете перейти в личный кабинет, просмотреть счета и отправить заявку</p>
-                    <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                    <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center flex-wrap">
                         <a href="dashboard.php" class="btn btn-primary">Личный кабинет</a>
                         <a href="requests.php" class="btn btn-outline-primary">Мои заявки</a>
+                        <?php if (!empty($_SESSION['is_admin'])): ?>
+                            <a href="admin.php" class="btn btn-outline-secondary">Панель администратора</a>
+                        <?php endif; ?>
                     </div>
                 <?php else: ?>
                     <h1 class="display-5 fw-bold mb-3">ТСЖ Онлайн</h1>

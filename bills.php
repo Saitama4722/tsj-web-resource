@@ -46,6 +46,10 @@ mysqli_stmt_close($stmt);
     <div class="container">
         <h1>Счета ЖКХ</h1>
 
+        <?php if (isset($_GET['paid']) && $_GET['paid'] === '1'): ?>
+            <div class="alert alert-success">Счёт успешно оплачен</div>
+        <?php endif; ?>
+
         <?php if (count($bills) > 0): ?>
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
@@ -55,6 +59,7 @@ mysqli_stmt_close($stmt);
                             <th>Месяц</th>
                             <th>Сумма</th>
                             <th>Статус</th>
+                            <th>Действие</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -74,6 +79,18 @@ mysqli_stmt_close($stmt);
                                 <td><?= htmlspecialchars($row['month']) ?></td>
                                 <td><?= htmlspecialchars($amountFormatted) ?></td>
                                 <td><span class="<?= $badgeClass ?>"><?= htmlspecialchars($row['status']) ?></span></td>
+                                <td>
+                                    <?php if ($row['status'] === 'Ожидает оплаты'): ?>
+                                        <form method="post" action="pay_bill.php">
+                                            <input type="hidden" name="bill_id" value="<?= (int) $row['id'] ?>">
+                                            <button type="submit" class="btn btn-sm btn-success">Оплатить</button>
+                                        </form>
+                                    <?php elseif ($row['status'] === 'Оплачен'): ?>
+                                        <span class="text-success">Оплачено</span>
+                                    <?php else: ?>
+                                        —
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
