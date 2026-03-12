@@ -1,14 +1,40 @@
-# ТСЖ Онлайн
+# ТСЖ Онлайн / HOA Online
 
-Веб-платформа для взаимодействия жильцов с управляющей организацией, позволяющая просматривать счета, оплачивать коммунальные услуги, отправлять заявки и отслеживать их статус.
+> Веб-платформа для взаимодействия жильцов с управляющей организацией, позволяющая просматривать счета, оплачивать коммунальные услуги, отправлять заявки и отслеживать их статус.
 
 ---
 
-# Русская версия
+## Содержание / Table of Contents
 
-## Описание
+- [Русская версия](#-русская-версия)
+  - [Описание проекта](#описание-проекта)
+  - [Функциональность системы](#функциональность-системы)
+  - [Технологии](#технологии)
+  - [Структура проекта](#структура-проекта)
+  - [Установка проекта](#установка-проекта)
+  - [Запуск проекта](#запуск-проекта)
+  - [Структура базы данных](#структура-базы-данных)
+  - [Скриншоты](#скриншоты)
+  - [Автор](#автор)
+- [English Version](#-english-version)
+  - [Project Description](#project-description)
+  - [System Functionality](#system-functionality)
+  - [Technologies](#technologies)
+  - [Project Structure](#project-structure)
+  - [Installation](#installation)
+  - [Running the Project](#running-the-project)
+  - [Database Structure](#database-structure)
+  - [Screenshots](#screenshots-1)
+  - [Author](#author-1)
+- [License](#-license)
 
-Система «ТСЖ Онлайн» — веб-приложение для управления коммунальными услугами и взаимодействия жильцов с управляющей организацией. Платформа предоставляет пользователям возможность работать с коммунальными услугами через веб-интерфейс.
+---
+
+# 🇷🇺 Русская версия
+
+## Описание проекта
+
+Система **«ТСЖ Онлайн»** — веб-приложение для управления коммунальными услугами и взаимодействия жильцов с управляющей организацией. Платформа предоставляет пользователям возможность работать с коммунальными услугами через веб-интерфейс.
 
 **Основные функции:**
 
@@ -21,7 +47,7 @@
 - управление счетами
 - управление заявками
 
-## Основные возможности
+## Функциональность системы
 
 ### Пользователь
 
@@ -41,13 +67,13 @@
 - добавление счетов пользователям
 - просмотр всех счетов
 
-## Архитектура системы
+## Технологии
 
 | Компонент | Технологии |
 |-----------|------------|
-| **Frontend** | HTML, Bootstrap |
+| **Frontend** | HTML, Bootstrap, CSS |
 | **Backend** | PHP (procedural) |
-| **Database** | MySQL |
+| **База данных** | MySQL |
 
 ## Структура проекта
 
@@ -66,45 +92,97 @@
 | `logout.php` | Выход из системы |
 | `404.php` | Страница ошибки |
 | `footer.php` | Общий footer сайта |
-| `database.sql` | Структура базы данных |
+| `database.sql` | Структура и данные базы данных |
 | `db.php` | Подключение к БД |
 | `style.css` | Стили интерфейса |
+| `run_project.bat` | Запуск встроенного сервера PHP (Windows) |
+| `stop_project.bat` | Остановка сервера |
 
-## База данных
+## Установка проекта
 
-Используется СУБД MySQL. База данных `tsj_system` содержит следующие таблицы:
+1. **Установите PHP** (рекомендуется версия 7.4 или выше). PHP обязателен для работы проекта.
+2. **Установите MySQL** и убедитесь, что сервер БД запущен. MySQL обязателен для хранения данных.
+3. **Создайте базу данных** `tsj_system` и импортируйте в неё скрипт `database.sql` (через phpMyAdmin, консоль MySQL или другой клиент).
+4. **Настройте подключение к БД** в файле `db.php`: укажите корректные значения `$host`, `$user`, `$password`, `$database` под ваше окружение.
 
-| Таблица | Описание |
-|---------|----------|
-| **users** | Пользователи системы (имя, email, пароль, дата регистрации) |
-| **requests** | Заявки пользователей (заголовок, описание, статус, связь с пользователем) |
-| **bills** | Счета ЖКХ (месяц, сумма, статус оплаты, связь с пользователем) |
+## Запуск проекта
 
-## Доступы для входа
+После установки запустите проект с помощью скрипта:
+
+```batch
+run_project.bat
+```
+
+Скрипт проверяет наличие PHP, запускает встроенный веб-сервер PHP и открывает приложение по адресу **http://localhost:8080**. Не закрывайте окно консоли во время работы. Для остановки сервера закройте окно или используйте `stop_project.bat`.
+
+Альтернатива (без bat-файла):
+
+```bash
+php -S localhost:8080
+```
+
+Затем откройте в браузере: **http://localhost:8080** или **http://localhost:8080/index.php**.
+
+## Структура базы данных
+
+Используется СУБД MySQL. База данных **`tsj_system`** содержит следующие таблицы:
+
+### Таблица `users`
+
+Хранит учётные записи пользователей системы.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `id` | INT, PK, AUTO_INCREMENT | Уникальный идентификатор |
+| `name` | VARCHAR(100) | Имя пользователя |
+| `email` | VARCHAR(100), UNIQUE | Email (логин) |
+| `password` | VARCHAR(255) | Хеш пароля (bcrypt) |
+| `created_at` | TIMESTAMP | Дата регистрации |
+
+### Таблица `requests`
+
+Заявки пользователей (обращения в управляющую организацию).
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `id` | INT, PK, AUTO_INCREMENT | Уникальный идентификатор |
+| `user_id` | INT, FK → users(id) | Автор заявки |
+| `title` | VARCHAR(255) | Заголовок заявки |
+| `description` | TEXT | Описание |
+| `status` | VARCHAR(50) | Статус (Новая, В работе, Выполнена и т.д.) |
+| `created_at` | TIMESTAMP | Дата создания |
+
+### Таблица `bills`
+
+Счета за коммунальные услуги.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `id` | INT, PK, AUTO_INCREMENT | Уникальный идентификатор |
+| `user_id` | INT, FK → users(id) | Владелец счёта |
+| `month` | VARCHAR(50) | Период (например, «Январь 2025») |
+| `amount` | DECIMAL(10,2) | Сумма к оплате |
+| `status` | VARCHAR(50) | Статус (Ожидает оплаты, Оплачен и т.д.) |
+
+### Доступы для входа
 
 После импорта `database.sql` в системе доступны следующие учётные записи:
 
-### Пользователь 1
-- **Email:** ivan@example.com  
-- **Password:** 123456  
+| Роль | Email | Пароль |
+|------|-------|--------|
+| Пользователь 1 | ivan@example.com | 123456 |
+| Пользователь 2 | maria@example.com | 123456 |
+| Администратор | admin@tsj.local | admin123 |
 
-### Пользователь 2
-- **Email:** maria@example.com  
-- **Password:** 123456  
+## Скриншоты
 
-### Администратор
-- **Email:** admin@tsj.local  
-- **Password:** admin123  
+- **Главная страница** (`index.php`) — приветствие и ссылки на вход/регистрацию.
+- **Личный кабинет** (`dashboard.php`) — сводка по заявкам и счетам пользователя после входа.
+- **Заявки** (`requests.php`) — список заявок пользователя с возможностью создания новой и просмотра статуса.
+- **Счета** (`bills.php`) — список счетов с отображением суммы, периода и статуса оплаты; доступна кнопка оплаты.
+- **Панель администратора** (`admin.php`) — переходы к управлению заявками и счетами для всех пользователей.
 
-## Установка и запуск
-
-1. **Установить PHP** (рекомендуется версия 7.4 или выше).
-2. **Установить MySQL** и создать базу данных.
-3. **Импортировать структуру и данные:** выполнить скрипт `database.sql` в MySQL (через phpMyAdmin, консоль или другой клиент).
-4. **Настроить подключение к БД:** в файле `db.php` указать корректные значения `$host`, `$user`, `$password`, `$database` под ваше окружение.
-5. **Запустить проект:** разместить файлы в корне веб-сервера (Apache, Nginx с PHP) или использовать встроенный сервер PHP:  
-   `php -S localhost:8000`  
-   Затем открыть в браузере: `http://localhost:8000`.
+*(Для актуального вида интерфейса откройте приложение в браузере после запуска через `run_project.bat`.)*
 
 ## Интерфейс
 
@@ -113,11 +191,15 @@
 - Единая **навигация** и **footer** (`footer.php`) используются на основных страницах.
 - Для несуществующих страниц отображается отдельная **страница 404** (`404.php`).
 
+## Автор
+
+Проект «ТСЖ Онлайн» разработан в учебных целях.
+
 ---
 
-# English Version
+# 🇬🇧 English Version
 
-## Description
+## Project Description
 
 **ТСЖ Онлайн** (HOA Online) is a web application for managing utilities and interaction between residents and the management company. The platform allows users to work with housing and communal services through a web interface.
 
@@ -132,7 +214,7 @@
 - Bill management
 - Request management
 
-## Features
+## System Functionality
 
 ### User Features
 
@@ -152,11 +234,11 @@
 - Add bills for users
 - View all bills
 
-## System Architecture
+## Technologies
 
 | Component | Technologies |
 |-----------|--------------|
-| **Frontend** | HTML, Bootstrap |
+| **Frontend** | HTML, Bootstrap, CSS |
 | **Backend** | PHP (procedural) |
 | **Database** | MySQL |
 
@@ -177,45 +259,97 @@
 | `logout.php` | Logout |
 | `404.php` | Error page |
 | `footer.php` | Shared site footer |
-| `database.sql` | Database structure |
+| `database.sql` | Database structure and seed data |
 | `db.php` | Database connection |
 | `style.css` | Interface styles |
-
-## Database
-
-The application uses MySQL. The `tsj_system` database includes the following tables:
-
-| Table | Description |
-|-------|-------------|
-| **users** | System users (name, email, password, registration date) |
-| **requests** | User requests (title, description, status, user reference) |
-| **bills** | Utility bills (month, amount, payment status, user reference) |
-
-## Demo Accounts
-
-After importing `database.sql`, the following accounts are available:
-
-### User 1
-- **Email:** ivan@example.com  
-- **Password:** 123456  
-
-### User 2
-- **Email:** maria@example.com  
-- **Password:** 123456  
-
-### Administrator
-- **Email:** admin@tsj.local  
-- **Password:** admin123  
+| `run_project.bat` | Start built-in PHP server (Windows) |
+| `stop_project.bat` | Stop server |
 
 ## Installation
 
-1. **Install PHP** (version 7.4 or higher recommended).
-2. **Install MySQL** and create a database.
-3. **Import structure and data:** run the `database.sql` script in MySQL (via phpMyAdmin, console, or another client).
-4. **Configure database connection:** in `db.php`, set the correct `$host`, `$user`, `$password`, and `$database` for your environment.
-5. **Run the project:** place the files in the web server root (Apache, Nginx with PHP) or use the built-in PHP server:  
-   `php -S localhost:8000`  
-   Then open in a browser: `http://localhost:8000`.
+1. **Install PHP** (version 7.4 or higher recommended). PHP is required to run the project.
+2. **Install MySQL** and ensure the database server is running. MySQL is required for data storage.
+3. **Create the database** `tsj_system` and import the `database.sql` script (via phpMyAdmin, MySQL console, or another client).
+4. **Configure the database connection** in `db.php`: set the correct `$host`, `$user`, `$password`, and `$database` for your environment.
+
+## Running the Project
+
+After installation, start the project using the script:
+
+```batch
+run_project.bat
+```
+
+The script checks for PHP, starts the built-in PHP web server, and serves the application at **http://localhost:8080**. Do not close the console window while using the app. To stop the server, close the window or run `stop_project.bat`.
+
+Alternative (without the batch file):
+
+```bash
+php -S localhost:8080
+```
+
+Then open in a browser: **http://localhost:8080** or **http://localhost:8080/index.php**.
+
+## Database Structure
+
+The application uses MySQL. The **`tsj_system`** database contains the following tables:
+
+### Table `users`
+
+Stores user accounts.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INT, PK, AUTO_INCREMENT | Unique identifier |
+| `name` | VARCHAR(100) | User name |
+| `email` | VARCHAR(100), UNIQUE | Email (login) |
+| `password` | VARCHAR(255) | Password hash (bcrypt) |
+| `created_at` | TIMESTAMP | Registration date |
+
+### Table `requests`
+
+User requests (complaints and requests to the management company).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INT, PK, AUTO_INCREMENT | Unique identifier |
+| `user_id` | INT, FK → users(id) | Request author |
+| `title` | VARCHAR(255) | Request title |
+| `description` | TEXT | Description |
+| `status` | VARCHAR(50) | Status (New, In progress, Completed, etc.) |
+| `created_at` | TIMESTAMP | Creation date |
+
+### Table `bills`
+
+Utility bills.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INT, PK, AUTO_INCREMENT | Unique identifier |
+| `user_id` | INT, FK → users(id) | Bill owner |
+| `month` | VARCHAR(50) | Billing period (e.g. "January 2025") |
+| `amount` | DECIMAL(10,2) | Amount due |
+| `status` | VARCHAR(50) | Status (Pending, Paid, etc.) |
+
+### Demo Accounts
+
+After importing `database.sql`, the following accounts are available:
+
+| Role | Email | Password |
+|------|-------|----------|
+| User 1 | ivan@example.com | 123456 |
+| User 2 | maria@example.com | 123456 |
+| Administrator | admin@tsj.local | admin123 |
+
+## Screenshots
+
+- **Main page** (`index.php`) — welcome screen and links to login/register.
+- **Personal account** (`dashboard.php`) — overview of the user's requests and bills after login.
+- **Requests** (`requests.php`) — list of user requests with option to create new ones and view status.
+- **Bills** (`bills.php`) — list of bills with amount, period, and payment status; pay button available.
+- **Administrator panel** (`admin.php`) — links to manage all requests and bills.
+
+*(For the actual look of the interface, open the application in a browser after starting it with `run_project.bat`.)*
 
 ## Interface
 
@@ -223,3 +357,17 @@ After importing `database.sql`, the following accounts are available:
 - **Responsive design** is implemented for comfortable use on desktop and mobile devices.
 - Shared **navigation** and **footer** (`footer.php`) are used across main pages.
 - A dedicated **404 page** (`404.php`) is shown for non-existent URLs.
+
+## Author
+
+The «ТСЖ Онлайн» project was developed for educational purposes.
+
+---
+
+# 📄 License
+
+This project is provided for educational use. You may use, modify, and distribute it in accordance with your course or institution guidelines. No warranty is provided.
+
+---
+
+*ТСЖ Онлайн / HOA Online — веб-платформа для управления ЖКХ и взаимодействия жильцов с УК.*
