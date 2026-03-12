@@ -1,0 +1,40 @@
+/**
+ * Стили для учебного проекта ТСЖ Онлайн
+ */
+
+/* Отступы для основного контента */
+.container {
+    margin-top: 2rem;
+    margin-bottom: 3rem;
+}
+
+/* Центрирование заголовков */
+h1, h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+/* Отступы для секций */
+section {
+    margin-bottom: 2rem;
+}
+
+/* Карточки в личном кабинете */
+.card {
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Формы */
+.form-section {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Таблица счетов */
+.table-responsive {
+    margin-top: 1rem;
+}
