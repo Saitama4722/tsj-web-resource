@@ -1,4 +1,30 @@
-<?php require_once 'db.php'; ?>
+<?php
+session_start();
+require_once 'db.php';
+
+$error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    if ($email && $password) {
+        $stmt = mysqli_prepare($conn, "SELECT id, name, password FROM users WHERE email = ?");
+        mysqli_stmt_bind_param($stmt, "s", $email);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $user = mysqli_fetch_assoc($result);
+
+        if ($user && password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_name'] = $user['name'];
+            header('Location: dashboard.php');
+            exit;
+        }
+        $error = 'Неверный email или пароль';
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -18,11 +44,15 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="index.php">Главная</a></li>
-                    <li class="nav-item"><a class="nav-link" href="dashboard.php">Личный кабинет</a></li>
-                    <li class="nav-item"><a class="nav-link" href="requests.php">Заявки</a></li>
-                    <li class="nav-item"><a class="nav-link" href="bills.php">Счета</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="login.php">Вход</a></li>
-                    <li class="nav-item"><a class="nav-link" href="register.php">Регистрация</a></li>
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <li class="nav-item"><a class="nav-link" href="dashboard.php">Личный кабинет</a></li>
+                        <li class="nav-item"><a class="nav-link" href="requests.php">Заявки</a></li>
+                        <li class="nav-item"><a class="nav-link" href="bills.php">Счета</a></li>
+                        <li class="nav-item"><a class="nav-link" href="logout.php">Выйти</a></li>
+                    <?php else: ?>
+                        <li class="nav-item"><a class="nav-link active" href="login.php">Вход</a></li>
+                        <li class="nav-item"><a class="nav-link" href="register.php">Регистрация</a></li>
+                    <?php endif; ?>
                 </ul>
             </div>
         </div>
@@ -30,11 +60,14 @@
 
     <div class="container">
         <h1>Вход</h1>
+        <?php if ($error): ?>
+            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
         <div class="form-section">
-            <form method="post" action="">
+            <form method="post" action="login.php">
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
+                    <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required>
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Пароль</label>

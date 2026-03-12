@@ -1,4 +1,11 @@
-<?php require_once 'db.php'; ?>
+<?php
+session_start();
+require_once 'db.php';
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -21,8 +28,7 @@
                     <li class="nav-item"><a class="nav-link active" href="dashboard.php">Личный кабинет</a></li>
                     <li class="nav-item"><a class="nav-link" href="requests.php">Заявки</a></li>
                     <li class="nav-item"><a class="nav-link" href="bills.php">Счета</a></li>
-                    <li class="nav-item"><a class="nav-link" href="login.php">Вход</a></li>
-                    <li class="nav-item"><a class="nav-link" href="register.php">Регистрация</a></li>
+                    <li class="nav-item"><a class="nav-link" href="logout.php">Выйти</a></li>
                 </ul>
             </div>
         </div>
@@ -30,6 +36,9 @@
 
     <div class="container">
         <h1>Личный кабинет</h1>
+        <?php if (isset($_SESSION['user_name'])): ?>
+            <p class="lead">Здравствуйте, <?= htmlspecialchars($_SESSION['user_name']) ?>!</p>
+        <?php endif; ?>
         <div class="row">
             <div class="col-md-4">
                 <div class="card">
