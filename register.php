@@ -4,13 +4,28 @@ require_once 'db.php';
 
 $message = '';
 $error = '';
+$saved_name = '';
+$saved_email = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if ($name && $email && $password) {
+    // Валидация
+    if ($name === '') {
+        $error = 'Имя не должно быть пустым.';
+    } elseif ($email === '') {
+        $error = 'Email не должен быть пустым.';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = 'Введите корректный email.';
+    } elseif ($password === '') {
+        $error = 'Пароль не должен быть пустым.';
+    } elseif (strlen($password) < 6) {
+        $error = 'Пароль должен быть не меньше 6 символов.';
+    }
+
+    if ($error === '') {
         // Проверка: есть ли уже такой email
         $stmt = mysqli_prepare($conn, "SELECT id FROM users WHERE email = ?");
         mysqli_stmt_bind_param($stmt, "s", $email);
@@ -19,6 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (mysqli_stmt_num_rows($stmt) > 0) {
             $error = 'Такой email уже зарегистрирован.';
+            $saved_name = $name;
+            $saved_email = $email;
         } else {
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = mysqli_prepare($conn, "INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
@@ -27,8 +44,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $message = 'Регистрация успешна';
             } else {
                 $error = 'Ошибка при регистрации. Попробуйте снова.';
+                $saved_name = $name;
+                $saved_email = $email;
             }
         }
+    } else {
+        $saved_name = $name;
+        $saved_email = $email;
     }
 }
 ?>
@@ -77,15 +99,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form method="post" action="register.php">
                 <div class="mb-3">
                     <label for="name" class="form-label">Имя</label>
-                    <input type="text" class="form-control" id="name" name="name" value="<?= htmlspecialchars($_POST['name'] ?? '') ?>" required>
+                    <input type="text" class="form-control" id="name" name="name" value="<?= htmlspecialchars($saved_name) ?>">
                 </div>
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required>
+                    <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($saved_email) ?>">
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Пароль</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
+                    <input type="password" class="form-control" id="password" name="password">
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
             </form>

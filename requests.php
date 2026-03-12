@@ -7,7 +7,10 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$message = '';
+$error = '';
+$saved_title = '';
+$saved_description = '';
+$show_success = isset($_GET['success']) && $_GET['success'] === '1';
 
 // Обработка отправки формы
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -16,13 +19,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = (int) $_SESSION['user_id'];
     $status = 'Новая';
 
-    if ($title !== '' && $description !== '') {
+    // Валидация
+    if ($title === '') {
+        $error = 'Тема заявки не должна быть пустой.';
+        $saved_title = $title;
+        $saved_description = $description;
+    } elseif (strlen($title) > 255) {
+        $error = 'Тема заявки не должна быть длиннее 255 символов.';
+        $saved_title = $title;
+        $saved_description = $description;
+    } elseif ($description === '') {
+        $error = 'Описание не должно быть пустым.';
+        $saved_title = $title;
+        $saved_description = $description;
+    }
+
+    if ($error === '') {
         $stmt_ins = mysqli_prepare($conn, "INSERT INTO requests (user_id, title, description, status) VALUES (?, ?, ?, ?)");
         mysqli_stmt_bind_param($stmt_ins, 'isss', $user_id, $title, $description, $status);
         if (mysqli_stmt_execute($stmt_ins)) {
-            $message = 'Заявка успешно отправлена';
+            mysqli_stmt_close($stmt_ins);
+            header('Location: requests.php?success=1');
+            exit;
         }
         mysqli_stmt_close($stmt_ins);
+        $error = 'Ошибка при создании заявки. Попробуйте снова.';
+        $saved_title = $title;
+        $saved_description = $description;
     }
 }
 
@@ -66,19 +89,23 @@ mysqli_stmt_close($stmt);
     <div class="container">
         <h1>Мои заявки</h1>
 
-        <?php if ($message): ?>
-            <div class="alert alert-success"><?= htmlspecialchars($message) ?></div>
+        <?php if ($show_success): ?>
+            <div class="alert alert-success">Заявка успешно отправлена</div>
+        <?php endif; ?>
+
+        <?php if ($error): ?>
+            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
 
         <div class="form-section mb-4">
             <form method="post" action="">
                 <div class="mb-3">
                     <label for="title" class="form-label">Тема заявки</label>
-                    <input type="text" class="form-control" id="title" name="title" required placeholder="Например: Протечка крыши">
+                    <input type="text" class="form-control" id="title" name="title" maxlength="255" value="<?= htmlspecialchars($saved_title) ?>" placeholder="Например: Протечка крыши">
                 </div>
                 <div class="mb-3">
                     <label for="description" class="form-label">Описание</label>
-                    <textarea class="form-control" id="description" name="description" rows="4" required placeholder="Опишите проблему подробнее..."></textarea>
+                    <textarea class="form-control" id="description" name="description" rows="4" placeholder="Опишите проблему подробнее..."><?= htmlspecialchars($saved_description) ?></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary">Отправить</button>
             </form>

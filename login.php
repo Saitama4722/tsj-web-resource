@@ -3,12 +3,25 @@ session_start();
 require_once 'db.php';
 
 $error = '';
+$saved_email = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if ($email && $password) {
+    // Валидация
+    if ($email === '') {
+        $error = 'Email не должен быть пустым.';
+        $saved_email = $email;
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = 'Введите корректный email.';
+        $saved_email = $email;
+    } elseif ($password === '') {
+        $error = 'Пароль не должен быть пустым.';
+        $saved_email = $email;
+    }
+
+    if ($error === '') {
         $stmt = mysqli_prepare($conn, "SELECT id, name, password FROM users WHERE email = ?");
         mysqli_stmt_bind_param($stmt, "s", $email);
         mysqli_stmt_execute($stmt);
@@ -22,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
         $error = 'Неверный email или пароль';
+        $saved_email = $email;
     }
 }
 ?>
@@ -67,11 +81,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form method="post" action="login.php">
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required>
+                    <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($saved_email) ?>">
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Пароль</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
+                    <input type="password" class="form-control" id="password" name="password">
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Войти</button>
             </form>
