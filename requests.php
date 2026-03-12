@@ -1,6 +1,39 @@
 <?php
 session_start();
 require_once 'db.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+$message = '';
+
+// Обработка отправки формы
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $title = trim($_POST['title'] ?? '');
+    $description = trim($_POST['description'] ?? '');
+    $user_id = (int) $_SESSION['user_id'];
+    $status = 'Новая';
+
+    if ($title !== '' && $description !== '') {
+        $stmt_ins = mysqli_prepare($conn, "INSERT INTO requests (user_id, title, description, status) VALUES (?, ?, ?, ?)");
+        mysqli_stmt_bind_param($stmt_ins, 'isss', $user_id, $title, $description, $status);
+        if (mysqli_stmt_execute($stmt_ins)) {
+            $message = 'Заявка успешно отправлена';
+        }
+        mysqli_stmt_close($stmt_ins);
+    }
+}
+
+// Получение заявок текущего пользователя
+$user_id = (int) $_SESSION['user_id'];
+$stmt = mysqli_prepare($conn, "SELECT id, title, description, status, created_at FROM requests WHERE user_id = ? ORDER BY created_at DESC");
+mysqli_stmt_bind_param($stmt, 'i', $user_id);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$requests = mysqli_fetch_all($result, MYSQLI_ASSOC);
+mysqli_stmt_close($stmt);
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -21,35 +54,64 @@ require_once 'db.php';
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="index.php">Главная</a></li>
-                    <?php if (isset($_SESSION['user_id'])): ?>
-                        <li class="nav-item"><a class="nav-link" href="dashboard.php">Личный кабинет</a></li>
-                        <li class="nav-item"><a class="nav-link active" href="requests.php">Заявки</a></li>
-                        <li class="nav-item"><a class="nav-link" href="bills.php">Счета</a></li>
-                        <li class="nav-item"><a class="nav-link" href="logout.php">Выйти</a></li>
-                    <?php else: ?>
-                        <li class="nav-item"><a class="nav-link" href="login.php">Вход</a></li>
-                        <li class="nav-item"><a class="nav-link" href="register.php">Регистрация</a></li>
-                    <?php endif; ?>
+                    <li class="nav-item"><a class="nav-link" href="dashboard.php">Личный кабинет</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="requests.php">Заявки</a></li>
+                    <li class="nav-item"><a class="nav-link" href="bills.php">Счета</a></li>
+                    <li class="nav-item"><a class="nav-link" href="logout.php">Выйти</a></li>
                 </ul>
             </div>
         </div>
     </nav>
 
     <div class="container">
-        <h1>Подать заявку</h1>
-        <div class="form-section">
+        <h1>Мои заявки</h1>
+
+        <?php if ($message): ?>
+            <div class="alert alert-success"><?= htmlspecialchars($message) ?></div>
+        <?php endif; ?>
+
+        <div class="form-section mb-4">
             <form method="post" action="">
                 <div class="mb-3">
-                    <label for="subject" class="form-label">Тема заявки</label>
-                    <input type="text" class="form-control" id="subject" name="subject" required placeholder="Например: Протечка крыши">
+                    <label for="title" class="form-label">Тема заявки</label>
+                    <input type="text" class="form-control" id="title" name="title" required placeholder="Например: Протечка крыши">
                 </div>
                 <div class="mb-3">
                     <label for="description" class="form-label">Описание</label>
                     <textarea class="form-control" id="description" name="description" rows="4" required placeholder="Опишите проблему подробнее..."></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Отправить</button>
+                <button type="submit" class="btn btn-primary">Отправить</button>
             </form>
         </div>
+
+        <?php if (count($requests) > 0): ?>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>№</th>
+                            <th>Тема</th>
+                            <th>Описание</th>
+                            <th>Статус</th>
+                            <th>Дата</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($requests as $index => $row): ?>
+                            <tr>
+                                <td><?= $index + 1 ?></td>
+                                <td><?= htmlspecialchars($row['title']) ?></td>
+                                <td><?= htmlspecialchars($row['description']) ?></td>
+                                <td><?= htmlspecialchars($row['status']) ?></td>
+                                <td><?= htmlspecialchars(date('d.m.Y H:i', strtotime($row['created_at']))) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <p class="text-muted">У вас пока нет заявок</p>
+        <?php endif; ?>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
