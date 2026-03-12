@@ -54,7 +54,7 @@ $bills = mysqli_fetch_all($result, MYSQLI_ASSOC);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="index.php">ТСЖ Онлайн</a>
@@ -73,6 +73,7 @@ $bills = mysqli_fetch_all($result, MYSQLI_ASSOC);
         </div>
     </nav>
 
+    <main class="flex-fill">
     <div class="container py-4">
         <h1>Управление счетами</h1>
 
@@ -151,7 +152,9 @@ $bills = mysqli_fetch_all($result, MYSQLI_ASSOC);
             <p class="text-muted">Счетов пока нет</p>
         <?php endif; ?>
     </div>
+    </main>
 
+    <?php require_once 'footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -17,7 +17,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['is_admin'] !== true) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="index.php">ТСЖ Онлайн</a>
@@ -36,6 +36,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['is_admin'] !== true) {
         </div>
     </nav>
 
+    <main class="flex-fill">
     <div class="container py-4">
         <h1>Панель администратора</h1>
         <p class="lead text-muted">Управление заявками и счетами</p>
@@ -61,7 +62,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['is_admin'] !== true) {
             </div>
         </div>
     </div>
+    </main>
 
+    <?php require_once 'footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

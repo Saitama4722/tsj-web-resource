@@ -14,7 +14,7 @@ $user_name = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : '';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="index.php">ТСЖ Онлайн</a>
@@ -38,6 +38,7 @@ $user_name = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : '';
         </div>
     </nav>
 
+    <main class="flex-fill">
     <div class="container">
         <section class="py-5">
             <div class="text-center py-4 px-3 rounded-3 bg-light border">
@@ -106,7 +107,9 @@ $user_name = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : '';
             </div>
         </section>
     </div>
+    </main>
 
+    <?php require_once 'footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
